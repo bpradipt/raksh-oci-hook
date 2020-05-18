@@ -7,6 +7,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	rakshSecretsVMTEEDir = "/run/raksh/secrets"
+	configMapKeyFileName = "configMapKey"
+	imageKeyFileName     = "imageKey"
+	nonceFileName        = "nonce"
+)
+
 // DecryptConfigMap decrypts the config map
 func DecryptConfigMap(data []byte, symmKey []byte, nonce []byte) ([]byte, error) {
 	log.Info("Decrypt configMap")
