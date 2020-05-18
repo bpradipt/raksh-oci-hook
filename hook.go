@@ -10,10 +10,21 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 
+	"github.com/runc/libcontainer/configs"
 	"github.com/sirupsen/logrus"
 
 	runSpec "github.com/opencontainers/runtime-spec/specs-go"
+)
+
+const (
+
+	//Raksh Mount Points
+	rakshMountPoint           = "/etc/raksh"
+	rakshSecretMountPoint     = rakshMountPoint + "/secrets"
+	rakshUserSecretMountPoint = rakshMountPoint + "/secrets/user"
+	rakshEncConfigMapPath     = rakshMountPoint + "/spec"
 )
 
 var (
@@ -80,6 +91,21 @@ func startRakshHook() error {
 	bundlePath := s.Bundle
 	containerPid := s.Pid
 
+	//Get source mount path for Raksh secrets
+	rakshSecretSrcMountPath, err := getMountSrcFromConfigJson(bundlePath, rakshSecretMountPoint)
+	if (rakshSecretSrcMountPath == "") || (err != nil) {
+		log.Errorf("getting source mount path for %s returned %s", rakshSecretMountPoint, err)
+		return err
+	}
+	log.Infof("Source mount path for Raksh secret is %s", rakshSecretSrcMountPath)
+
+	//Get source mount path for Raksh spec (/etc/raksh/spec)
+	rakshEncConfigMapMountPath, err := getMountSrcFromConfigJson(bundlePath, rakshEncConfigMapPath)
+	if (rakshEncConfigMapMountPath == "") || (err != nil) {
+		log.Errorf("getting source mount path for %s returned %s", rakshEncConfigMapPath, err)
+		return err
+	}
+	log.Infof("Source mount path for Raksh encrypted config Map is %s", rakshEncConfigMapMountPath)
 	//Basic skeleton
 
 	err = modifyRakshBindMount(containerPid, bundlePath)
@@ -89,6 +115,41 @@ func startRakshHook() error {
 	}
 
 	return nil
+}
+
+//Get source path of bind mount
+func getMountSrcFromConfigJson(configJsonDir string, destMountPath string) (string, error) {
+
+	var srcMountPath string
+	//Take out the config.json from the bundle and edit the mount points
+	configJsonPath := filepath.Join(configJsonDir, "config.json")
+
+	log.Infof("Config.json location: %s", configJsonPath)
+	//Read the JSON
+	var config configs.Config
+	jsonData, err := ioutil.ReadFile(configJsonPath)
+	if err != nil {
+		log.Errorf("unable to read config.json %s", err)
+		return "", err
+	}
+	err = json.Unmarshal(jsonData, &config)
+	if err != nil {
+		log.Errorf("unable to unmarshal config.json %s", err)
+		return "", err
+	}
+	for _, m := range config.Mounts {
+		log.Infof("src: %s  ==  dest: %s", m.Source, m.Destination)
+		//Check if dest matches destMountPath
+		if strings.Contains(m.Destination, destMountPath) == true {
+			srcMountPath = m.Source
+			break
+		}
+	}
+
+	log.Infof("mount src from config.json: %s", srcMountPath)
+
+	return srcMountPath, nil
+
 }
 
 func modifyRakshBindMount(pid int, bundlePath string) error {
