@@ -33,6 +33,11 @@ const (
 
 	//Raksh properties
 	rakshProperties = "properties"
+
+	//VM TEE mount points (in-memory)
+	rakshVMTEEMountPoint           = "/run/raksh"
+	rakshSecretVMTEEMountPoint     = rakshVMTEEMountPoint + "/secrets"
+	rakshUserSecretVMTEEMountPoint = rakshVMTEEMountPoint + "/secrets/user"
 )
 
 var (

@@ -55,6 +55,12 @@ func readEncryptedConfigmap(encryptedYamlContainerSpec []byte, configMapKey []by
 	}
 	log.Debugf("Decrypted configmap %v", decryptedConfigMap)
 
+	err = persistDecryptedConfigMap(decryptedConfigMap)
+	if err != nil {
+		log.Errorf("Error when persisting decrypted configmap %s", err)
+		return nil, err
+	}
+
 	err = yaml.Unmarshal(decryptedConfigMap, &scConfig)
 	if err != nil {
 		log.Errorf("Error unmarshalling yaml %s", err)
@@ -93,6 +99,20 @@ func readRakshSecrets(srcPath string) (configMapKey []byte, nonce []byte, imageK
 	}
 
 	return configMapKey, nonce, imageKey, nil
+}
+
+//Persist the decrypted configMap in memory
+func persistDecryptedConfigMap(decryptedConfigMap []byte) error {
+
+	err := os.MkdirAll(rakshSecretVMTEEMountPoint, os.ModeDir)
+	if err != nil {
+		log.Debug("Unable to create directory for storing decrypted configMap")
+		return err
+	}
+	decryptCMFile := filepath.Join(rakshSecretVMTEEMountPoint, "decryptedConfigMap")
+	log.Debug("Write decrypted configmap into: ", decryptCMFile)
+	err = ioutil.WriteFile(decryptCMFile, decryptedConfigMap, 0644)
+	return err
 }
 
 //Get the secrets from the relevant files
