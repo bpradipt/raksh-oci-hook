@@ -25,6 +25,11 @@ const (
 	rakshSecretMountPoint     = rakshMountPoint + "/secrets"
 	rakshUserSecretMountPoint = rakshMountPoint + "/secrets/user"
 	rakshEncConfigMapPath     = rakshMountPoint + "/spec"
+
+	//Raksh secrets
+	configMapKeyFileName = "configMapKey"
+	imageKeyFileName     = "imageKey"
+	nonceFileName        = "nonce"
 )
 
 var (
@@ -106,7 +111,15 @@ func startRakshHook() error {
 		return err
 	}
 	log.Infof("Source mount path for Raksh encrypted config Map is %s", rakshEncConfigMapMountPath)
-	//Basic skeleton
+
+	//Read the Raksh secrets
+	// /etc/raksh/secrets/{configMapKey, nonce, imageKey}
+	configMapKey, nonce, imageKey, err := readRakshSecrets(rakshSecretSrcMountPath)
+	if err != nil {
+		log.Errorf("unable to read Raksh secret data %s", err)
+		return err
+	}
+	log.Debugf("Raksh encrypted secrets %v, %v, %v", configMapKey, nonce, imageKey)
 
 	err = modifyRakshBindMount(containerPid, bundlePath)
 	if err != nil {
