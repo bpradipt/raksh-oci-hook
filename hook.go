@@ -30,6 +30,9 @@ const (
 	configMapKeyFileName = "configMapKey"
 	imageKeyFileName     = "imageKey"
 	nonceFileName        = "nonce"
+
+	//Raksh properties
+	rakshProperties = "properties"
 )
 
 var (
@@ -120,6 +123,25 @@ func startRakshHook() error {
 		return err
 	}
 	log.Debugf("Raksh encrypted secrets %v, %v, %v", configMapKey, nonce, imageKey)
+
+	//Read the encrypted configMap - properties
+	// /etc/raksh/secrets/spec/properties
+	encConfigMapFile := filepath.Join(rakshEncConfigMapMountPath, rakshProperties)
+	encConfigMap, err := readSecretFile(encConfigMapFile)
+	if err != nil {
+		log.Errorf("Unable to read encConfigMap: %s", err)
+		return err
+	}
+
+	log.Debugf("encrypted configMap %v", encConfigMap)
+
+	scConfig, err := readEncryptedConfigmap(encConfigMap, configMapKey, nonce)
+	if err != nil {
+		log.Errorf("readEncryptedConfigmap errored out: %s", err)
+		return err
+	}
+
+	log.Debugf("decrypted configMap %v", scConfig)
 
 	err = modifyRakshBindMount(containerPid, bundlePath)
 	if err != nil {

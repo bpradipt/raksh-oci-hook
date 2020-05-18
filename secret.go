@@ -6,7 +6,64 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/ghodss/yaml"
+	"github.com/sample-oci-hook/pkg/crypto"
 )
+
+type requests struct {
+	CPU    string `yaml:"cpu"`
+	Memory string `yaml:"memory"`
+}
+type resources struct {
+	Requests requests `yaml:"requests"`
+}
+type env struct {
+	Name  string `yaml:"name"`
+	Value string `yaml:"value"`
+}
+type ports struct {
+	ContainerPort int `yaml:"containerPort"`
+}
+type containers struct {
+	Name      string    `yaml:"name"`
+	Image     string    `yaml:"image"`
+	Resources resources `yaml:"resources"`
+	Args      []string  `yaml:"args"`
+	Env       []env     `yaml:"env"`
+	Cwd       string    `yaml:"cwd"`
+	Ports     []ports   `yaml:"ports"`
+}
+type spec struct {
+	Containers []containers `yaml:"containers"`
+}
+type scConfig struct {
+	Spec spec `yaml:"spec"`
+}
+
+//Read encrypted ConfigMap containing Raksh properties
+func readEncryptedConfigmap(encryptedYamlContainerSpec []byte, configMapKey []byte, nonce []byte) (*scConfig, error) {
+
+	var scConfig scConfig
+
+	log.Infof("Reading encrypted configmap")
+
+	decryptedConfigMap, err := crypto.DecryptConfigMap(encryptedYamlContainerSpec, configMapKey, nonce)
+	if err != nil {
+		log.Errorf("Error in decrypting configMap %s", err)
+		return nil, err
+	}
+	log.Debugf("Decrypted configmap %v", decryptedConfigMap)
+
+	err = yaml.Unmarshal(decryptedConfigMap, &scConfig)
+	if err != nil {
+		log.Errorf("Error unmarshalling yaml %s", err)
+		return nil, err
+	}
+
+	return &scConfig, err
+
+}
 
 //Read the Raksh secrets
 func readRakshSecrets(srcPath string) (configMapKey []byte, nonce []byte, imageKey []byte, err error) {
