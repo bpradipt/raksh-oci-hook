@@ -14,6 +14,30 @@ const (
 	nonceFileName        = "nonce"
 )
 
+//Returns true if VM TEE (SEV/PEF/MKTME)
+func IsVMTEE() bool {
+	log.Info("Check if running in VM TEE")
+	if isSVM() == true {
+		log.Info("Running in VM TEE")
+		return true
+	}
+	//ToDo support for SEV and MKTME
+	return false
+}
+
+//Get Secrets from VM TEE
+func PopulateSecretsForVMTEE() error {
+	log.Info("Check if SVM")
+
+	if isSVM() == true {
+		err := populateRakshSecretsForSVM()
+		return err
+	}
+
+	//Add user secrets
+	return nil
+}
+
 // DecryptConfigMap decrypts the config map
 func DecryptConfigMap(data []byte, symmKey []byte, nonce []byte) ([]byte, error) {
 	log.Info("Decrypt configMap")

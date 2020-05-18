@@ -19,14 +19,15 @@ const (
 func isSVM() bool {
 	svm, err := ioutil.ReadFile(svmFile)
 	if err != nil {
-		log.Debug("Error reading svm file: ", svmFile, err)
+		log.Error("Error reading svm file: ", svmFile, err)
+		return false
 	}
 
 	if strings.Trim(string(svm), "\n") == "1" {
-		log.Debug("It is a VM with SVM/PEF support")
+		log.Info("It is a VM with SVM/PEF support")
 		return true
 	}
-	log.Debug("It is not an SVM")
+	log.Info("It is not an SVM")
 	return false
 }
 
@@ -37,7 +38,7 @@ func populateRakshSecretsForSVM() error {
 	log.Debug("Populating secrets for SVM/PEF")
 	err := os.MkdirAll(rakshSecretsVMTEEDir, os.ModeDir)
 	if err != nil {
-		log.Debug("Unable to create directory for storing SVM/PEF secrets")
+		log.Error("Unable to create directory for storing SVM/PEF secrets ", err)
 		return err
 	}
 	configMapKeyFile := filepath.Join(rakshSecretsVMTEEDir, configMapKeyFileName)
