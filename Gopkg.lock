@@ -2,12 +2,28 @@
 
 
 [[projects]]
+  digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:09cb61dc19af93deae01587e2fdb1c081e0bf48f1a5ad5fa24f48750dc57dce8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
   revision = "edb144dfd453055e1e49a3d8b410a660b5a87613"
   version = "v1.0.3"
+
+[[projects]]
+  digest = "1:7a29c3dc9a90c6c1a877b2d9cd0c5a23526ae1e5ae112597e12ba9456f4eac22"
+  name = "github.com/opencontainers/runc"
+  packages = ["libcontainer/configs"]
+  pruneopts = "UT"
+  revision = "1a124e9c2da68c867ed2c4f4ff19f0cd95cda0cd"
+  version = "v0.0.8"
 
 [[projects]]
   digest = "1:4af0de5df1d46286ca0edbc02a872516ea273882faa88cd15d0c263870c98714"
@@ -36,10 +52,20 @@
   pruneopts = "UT"
   revision = "1151b9dac4a98d49ef7f80f07ddd826ff51e0b36"
 
+[[projects]]
+  digest = "1:d7f1bd887dc650737a421b872ca883059580e9f8314d601f88025df4f4802dce"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0b1645d91e851e735d3e23330303ce81f70adbe3"
+  version = "v2.3.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/ghodss/yaml",
+    "github.com/opencontainers/runc/libcontainer/configs",
     "github.com/opencontainers/runtime-spec/specs-go",
     "github.com/sirupsen/logrus",
   ]

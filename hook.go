@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/runc/libcontainer/configs"
+	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/sirupsen/logrus"
 
 	runSpec "github.com/opencontainers/runtime-spec/specs-go"
