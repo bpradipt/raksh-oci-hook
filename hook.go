@@ -213,7 +213,7 @@ func modifyRakshBindMount(pid int, bundlePath string) error {
 	log.Debugf("Existing mount list inside the container : ", string(out))
 
 	//Unmount raksh properties
-	mntDest := filepath.Join(bundlePath, rakshEncConfigMapPath)
+	mntDest := filepath.Join(bundlePath, "rootfs", rakshEncConfigMapPath)
 	args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", mntDest}
 	cmd = exec.Command("nsenter", args...)
 	out, err = cmd.CombinedOutput()
@@ -224,7 +224,7 @@ func modifyRakshBindMount(pid int, bundlePath string) error {
 	}
 
 	//Unmount raksh secrets
-	mntDest = filepath.Join(bundlePath, rakshSecretMountPoint)
+	mntDest = filepath.Join(bundlePath, "rootfs", rakshSecretMountPoint)
 	args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", mntDest}
 	cmd = exec.Command("nsenter", args...)
 	out, err = cmd.CombinedOutput()
