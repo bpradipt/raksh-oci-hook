@@ -225,7 +225,7 @@ func modifyRakshBindMount(pid int, bundlePath string) error {
 
 	//Unmount raksh secrets
 	mntDest = filepath.Join(bundlePath, "rootfs", rakshSecretMountPoint)
-	args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", mntDest}
+	args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", "-R",  mntDest}
 	cmd = exec.Command("nsenter", args...)
 	out, err = cmd.CombinedOutput()
 	if err != nil {
