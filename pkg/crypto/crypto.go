@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	rakshSecretsVMTEEDir = "/run/raksh/secrets"
-	configMapKeyFileName = "configMapKey"
-	imageKeyFileName     = "imageKey"
-	nonceFileName        = "nonce"
+	rakshVMTEEMountPoint       = "/run/raksh"
+	rakshSecretVMTEEMountPoint = rakshVMTEEMountPoint + "/secrets"
+	configMapKeyFileName       = "configMapKey"
+	imageKeyFileName           = "imageKey"
+	nonceFileName              = "nonce"
 )
 
 //Returns true if VM TEE (SEV/PEF/MKTME)

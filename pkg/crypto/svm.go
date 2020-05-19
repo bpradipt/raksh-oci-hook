@@ -36,14 +36,14 @@ func isSVM() bool {
 func populateRakshSecretsForSVM() error {
 
 	log.Debug("Populating secrets for SVM/PEF")
-	err := os.MkdirAll(rakshSecretsVMTEEDir, os.ModeDir)
+	err := os.MkdirAll(rakshSecretVMTEEMountPoint, os.ModeDir)
 	if err != nil {
 		log.Error("Unable to create directory for storing SVM/PEF secrets ", err)
 		return err
 	}
-	configMapKeyFile := filepath.Join(rakshSecretsVMTEEDir, configMapKeyFileName)
-	imageKeyFile := filepath.Join(rakshSecretsVMTEEDir, imageKeyFileName)
-	nonceFile := filepath.Join(rakshSecretsVMTEEDir, nonceFileName)
+	configMapKeyFile := filepath.Join(rakshSecretVMTEEMountPoint, configMapKeyFileName)
+	imageKeyFile := filepath.Join(rakshSecretVMTEEMountPoint, imageKeyFileName)
+	nonceFile := filepath.Join(rakshSecretVMTEEMountPoint, nonceFileName)
 
 	err = populateKeyFileforSVM(configMapKeyFile)
 	if err != nil {

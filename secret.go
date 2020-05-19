@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/ghodss/yaml"
-	"github.com/sample-oci-hook/pkg/crypto"
+	"github.com/raksh-oci-hook/pkg/crypto"
 )
 
 type requests struct {
@@ -78,10 +78,25 @@ func readRakshSecrets(srcPath string) (configMapKey []byte, nonce []byte, imageK
 
 	log.Infof("Read Raksh secrets")
 
-	configMapKeyFile = filepath.Join(srcPath, configMapKeyFileName)
-	nonceFile = filepath.Join(srcPath, nonceFileName)
-	imageKeyFile = filepath.Join(srcPath, imageKeyFileName)
-	log.Debug("Found secrets at: ", srcPath)
+	//Decrypt the secret data - local/remote attestation etc
+	if crypto.IsVMTEE() == true {
+		//VM TEE
+		err = crypto.PopulateSecretsForVMTEE()
+		if err != nil {
+			log.Errorf("Error populating secrets for TEE")
+			return nil, nil, nil, err
+		}
+		configMapKeyFile = filepath.Join(rakshSecretVMTEEMountPoint, configMapKeyFileName)
+		imageKeyFile = filepath.Join(rakshSecretVMTEEMountPoint, imageKeyFileName)
+		nonceFile = filepath.Join(rakshSecretVMTEEMountPoint, nonceFileName)
+		log.Debug("Found secrets at: ", rakshSecretVMTEEMountPoint)
+	} else {
+		//non VM TEE case
+		configMapKeyFile = filepath.Join(srcPath, configMapKeyFileName)
+		nonceFile = filepath.Join(srcPath, nonceFileName)
+		imageKeyFile = filepath.Join(srcPath, imageKeyFileName)
+		log.Debug("Found secrets at: ", srcPath)
+	}
 
 	configMapKey, err = readSecretFile(configMapKeyFile)
 	if err != nil {
