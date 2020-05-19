@@ -1,0 +1,77 @@
+---
+apiVersion: v1
+data:
+  properties: QYBhUrohawDY82CCjKn1/uGrhooYvYCeJvpvdtJemW7deuIOrh/RobcXfRFjoQyA2DLtVqVojfvlspYeyTiU133jMHtca2muBZRSEgVGoK7khzEqg1wUH8l076UZ8V9+Kx46q0mPG12NyxvwV9WlAHLI3wF7eYowHRRkPYenyQfF+Kw8Zd5R8nzp2H6gl+IrxNaEywU=
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: secure-configmap-nginx
+  namespace: default
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: nginx
+  namespace: default
+  name: nginx
+spec:
+  runtimeClassName: kata-runtime
+  containers:
+    - image: nginx:latest
+      imagePullPolicy: IfNotPresent
+      name: nginx
+      ports:
+      - containerPort: 80
+        protocol: TCP
+      volumeMounts:
+      - mountPath: /etc/raksh/spec
+        name: secure-volume-nginx
+        readOnly: true
+      - mountPath: /etc/raksh/secrets
+        name: secure-volume-raksh
+        readOnly: true
+      - mountPath: /etc/raksh/secrets/user
+        name: secure-volume-user-secret
+        readOnly: true
+  volumes:
+    - configMap:
+        items:
+        - key: properties
+          path: properties
+        name: secure-configmap-nginx
+      name: secure-volume-nginx
+    - name: secure-volume-raksh
+      secret:
+        secretName: raksh-secret
+    - name: secure-volume-user-secret
+      secret:
+        secretName: user-secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    comment: actual_secret
+  name: raksh-secret
+  namespace: default
+stringData:
+  configMapKey: |
+    vVibSI4hUFkLIsuW5SfGnFLXAXnEcwzTS472r6D+x3Y=
+  imageKey: |
+    vVibSI4hUFkLIsuW5SfGnFLXAXnEcwzTS472r6D+x3Y=
+  nonce: |
+    rMr7iSz1k0oa1TrU
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  creationTimestamp: null
+  labels:
+    comment: user_secret
+  name: user-secret
+  namespace: default
+stringData:
+  mySecretKey1: value1
+  mySecretKey2: value2
