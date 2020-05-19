@@ -97,6 +97,7 @@ func readRakshUserSecrets(srcPath string, decKey []byte, nonce []byte) (userSecr
 			continue
 		}
 		userSecrets[file.Name()] = decValue
+                persistDecryptedUserSecrets(file.Name(), decValue)
 		log.Debugf("User secret value %s", string(decValue))
 	}
 	log.Debugf("User Secrets map: %v", userSecrets)
@@ -160,6 +161,20 @@ func persistDecryptedConfigMap(decryptedConfigMap []byte) error {
 	decryptCMFile := filepath.Join(rakshSecretVMTEEMountPoint, "decryptedConfigMap")
 	log.Debug("Write decrypted configmap into: ", decryptCMFile)
 	err = ioutil.WriteFile(decryptCMFile, decryptedConfigMap, 0644)
+	return err
+}
+
+//Persist the decrypted user secrets in memory
+func persistDecryptedUserSecrets(fileName string, plaintextData []byte) error {
+
+	err := os.MkdirAll(rakshUserSecretVMTEEMountPoint, os.ModeDir)
+	if err != nil {
+		log.Debug("Unable to create directory for storing decrypted user secrets")
+		return err
+	}
+	decryptKeyFile := filepath.Join(rakshUserSecretVMTEEMountPoint, fileName)
+	log.Info("Write decrypted user secret key into: ", decryptKeyFile)
+	err = ioutil.WriteFile(decryptKeyFile, plaintextData, 0644)
 	return err
 }
 
