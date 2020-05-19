@@ -148,6 +148,26 @@ func startRakshHook() error {
 
 	log.Debugf("decrypted configMap %v", scConfig)
 
+	//Read user secrets
+	// /etc/raksh/secrets/user/{key=value}
+
+	//Get source mount path for Raksh spec (/etc/raksh/secrets/user)
+	rakshEncUserSecretMountPath, err := getMountSrcFromConfigJson(bundlePath, rakshUserSecretMountPoint)
+	if (rakshEncUserSecretMountPath == "") || (err != nil) {
+		log.Errorf("getting source mount path for %s returned %s", rakshEncUserSecretMountPath, err)
+		return err
+	}
+	log.Infof("Source mount path for Raksh encrypted user secrets is %s", rakshEncUserSecretMountPath)
+
+        userSecretData := filepath.Join(rakshEncUserSecretMountPath, "..data")
+	userSecrets, err := readRakshUserSecrets(userSecretData, configMapKey, nonce)
+	if err != nil {
+		log.Errorf("readRakshUserSecrets errored out: %s", err)
+		return err
+	}
+
+	log.Debugf("decrypted user secrets %v", userSecrets)
+
 	err = modifyRakshBindMount(containerPid, bundlePath)
 	if err != nil {
 		log.Infof("Error modifying the Raksh mount point", err)

@@ -72,6 +72,39 @@ func readEncryptedConfigmap(encryptedYamlContainerSpec []byte, configMapKey []by
 }
 
 //Read the Raksh secrets
+func readRakshUserSecrets(srcPath string, decKey []byte, nonce []byte) (userSecrets map[string][]byte, err error) {
+	log.Infof("Read Raksh User secrets")
+	//read all key value pairs under srcPath
+	files, err := ioutil.ReadDir(srcPath)
+	if err != nil {
+		log.Errorf("Unable to read the secrets %s", err)
+		return nil, err
+	}
+	userSecrets = make(map[string][]byte)
+	for _, file := range files {
+		log.Debugf("User secret key %s", file.Name())
+		userSecrets[file.Name()] = []byte{}
+                keyPath := filepath.Join(srcPath, file.Name())
+		value, err := readSecretFile(keyPath)
+		if err != nil {
+			log.Errorf("Reading the value for %s resulted in error %s", file.Name(), err)
+			continue
+		}
+		//Decrypt the value. Use the master secret from Raksh secrets configMapKey and nonce
+		decValue, err := crypto.DecryptConfigMap(value, decKey, nonce)
+		if err != nil {
+			log.Errorf("Error in decrypting user secret key %s", err)
+			continue
+		}
+		userSecrets[file.Name()] = decValue
+		log.Debugf("User secret value %s", string(decValue))
+	}
+	log.Debugf("User Secrets map: %v", userSecrets)
+	return userSecrets, nil
+
+}
+
+//Read the Raksh secrets
 func readRakshSecrets(srcPath string) (configMapKey []byte, nonce []byte, imageKey []byte, err error) {
 
 	var configMapKeyFile, nonceFile, imageKeyFile string
