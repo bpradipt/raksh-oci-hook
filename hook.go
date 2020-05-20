@@ -254,6 +254,28 @@ func modifyRakshBindMount(pid int, bundlePath string) error {
 		return err
 	}
 
+        //Copy user secrets from rakshUserSecretVMTEEMountPoint to /etc/raksh/secrets/user
+        srcPath := rakshUserSecretVMTEEMountPoint
+        destPath := filepath.Join(bundlePath, "rootfs", rakshSecretMountPoint)
+        args = []string{"-m", "-p", "-t", strconv.Itoa(pid), "mount", "-t", "tmpfs", "tmpfs", destPath}
+        cmd = exec.Command("nsenter", args...)
+        out, err = cmd.CombinedOutput()
+        if err != nil {
+                log.Infof("Error in executing tmpfs mount ", err)
+                log.Infof("out ", string(out))
+                return err
+        }
+
+        args = []string{"-m", "-p", "-t", strconv.Itoa(pid), "cp", "-a", srcPath, destPath}
+        cmd = exec.Command("nsenter", args...)
+        out, err = cmd.CombinedOutput()
+        if err != nil {
+                log.Infof("Error in executing copy command ", err)
+                log.Infof("out ", string(out))
+                return err
+        }
+        log.Infof("ls out ", string(out))
+
 	log.Infof("Modifying bind mount complete")
 	return nil
 
