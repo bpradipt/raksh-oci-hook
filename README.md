@@ -2,9 +2,11 @@
 OCI runtime hook for Raksh to be used with Kata containers.
 This is a pre-start hook which will do the following before actual execution of the container
 
-- Get secrets inside Kata VM
-- Decrypt the encrypted configMap and verify with deployed spec
-- Decrypt the user secrets and make it available
+- Get secrets inside Kata VM. 
+  The decrypted secrets will be under /run/raksh/secrets
+- Decrypt the encrypted configMap and verify with deployed spec.
+- Decrypt the user secrets and make it available.
+  The decrypted user secrets will be available under /etc/raksh/secrets/user/{key1,key2...}
 
 # Building
 
