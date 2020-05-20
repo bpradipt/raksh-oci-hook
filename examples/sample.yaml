@@ -73,5 +73,5 @@ metadata:
   name: user-secret
   namespace: default
 stringData:
-  mySecretKey1: value1
-  mySecretKey2: value2
+  mySecretKey1: QYBhUrohawDY82CCjKn1/uGrhooYvYCeJvpvdtJemW7deuIOrh/RobcXfRFjoQyA2DLtVqVojfvlspYeyTiU133jMHtca2muBZRSEgVGoK7khzEqg1wUH8l076UZ8V9+Kx46q0mPG12NyxvwV9WlAHLI3wF7eYowHRRkPYenyQfF+Kw8Zd5R8nzp2H6gl+IrxNaEywU=
+  mySecretKey2: QYBhUrohawDY82CCjKn1/uGrhooYvYCeJvpvdtJemW7deuIOrh/RobcXfRFjoQyA2DLtVqVojfvlspYeyTiU133jMHtca2muBZRSEgVGoK7khzEqg1wUH8l076UZ8V9+Kx46q0mPG12NyxvwV9WlAHLI3wF7eYowHRRkPYenyQfF+Kw8Zd5R8nzp2H6gl+IrxNaEywU=
