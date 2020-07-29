@@ -104,8 +104,12 @@ func startRakshHook() error {
 	bundlePath := s.Bundle
 	containerPid := s.Pid
 
+	//configjson path has changed in Kata.
+	//https://github.com/kata-containers/agent/pull/798
+	configJsonPath := filepath.Join("/run/libcontainer", s.ID)
+
 	//Get source mount path for Raksh secrets
-	rakshSecretSrcMountPath, err := getMountSrcFromConfigJson(bundlePath, rakshSecretMountPoint)
+	rakshSecretSrcMountPath, err := getMountSrcFromConfigJson(configJsonPath, rakshSecretMountPoint)
 	if (rakshSecretSrcMountPath == "") || (err != nil) {
 		log.Errorf("getting source mount path for %s returned %s", rakshSecretMountPoint, err)
 		return err
@@ -113,7 +117,7 @@ func startRakshHook() error {
 	log.Infof("Source mount path for Raksh secret is %s", rakshSecretSrcMountPath)
 
 	//Get source mount path for Raksh spec (/etc/raksh/spec)
-	rakshEncConfigMapMountPath, err := getMountSrcFromConfigJson(bundlePath, rakshEncConfigMapPath)
+	rakshEncConfigMapMountPath, err := getMountSrcFromConfigJson(configJsonPath, rakshEncConfigMapPath)
 	if (rakshEncConfigMapMountPath == "") || (err != nil) {
 		log.Errorf("getting source mount path for %s returned %s", rakshEncConfigMapPath, err)
 		return err
@@ -152,7 +156,7 @@ func startRakshHook() error {
 	// /etc/raksh/secrets/user/{key=value}
 
 	//Get source mount path for Raksh spec (/etc/raksh/secrets/user)
-	rakshEncUserSecretMountPath, err := getMountSrcFromConfigJson(bundlePath, rakshUserSecretMountPoint)
+	rakshEncUserSecretMountPath, err := getMountSrcFromConfigJson(configJsonPath, rakshUserSecretMountPoint)
 	if (rakshEncUserSecretMountPath == "") || (err != nil) {
 		log.Errorf("getting source mount path for %s returned %s", rakshEncUserSecretMountPath, err)
 		return err
@@ -244,8 +248,22 @@ func modifyRakshBindMount(pid int, bundlePath string) error {
 	}
 
 	//Unmount raksh secrets
+	//RHEL/RHCOS busybox doesn't support recursive unmount
+	//mntDest = filepath.Join(bundlePath, "rootfs", rakshSecretMountPoint)
+	//args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", "-R",  mntDest}
+	mntDest = filepath.Join(bundlePath, "rootfs", rakshUserSecretMountPoint)
+	args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", mntDest}
+	cmd = exec.Command("nsenter", args...)
+	out, err = cmd.CombinedOutput()
+	if err != nil {
+		log.Infof("Error in executing umount for %s ", mntDest, err)
+		log.Infof("out ", string(out))
+		return err
+	}
+
 	mntDest = filepath.Join(bundlePath, "rootfs", rakshSecretMountPoint)
-	args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", "-R",  mntDest}
+	//args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", "-R",  mntDest}
+	args = []string{"-t", strconv.Itoa(pid), "-m", "-p", "umount", mntDest}
 	cmd = exec.Command("nsenter", args...)
 	out, err = cmd.CombinedOutput()
 	if err != nil {
